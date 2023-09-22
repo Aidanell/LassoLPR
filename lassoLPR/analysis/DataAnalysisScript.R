@@ -4,36 +4,41 @@ SimulationData <- readRDS("Downloads/Simulation4.RData")
 MSEData <- SimulationData[['MSEData']]
 
 
-###########Determining the percentage of time Lasso was performed the best###############
-HowOftenLassoBest <- rep(NULL, 4)
-InteriorHowOftenLassoBest <- rep(NULL, 4)
-for(j in 1:4){
-  HowOftenLassoBest[j] <- prop.table(table(MSEData[[j]][,4]))[1]
-  InteriorHowOftenLassoBest[j] <- prop.table(table(MSEData[[j]][,8]))[1]
-}
-
-HowOftenLassoBest
-InteriorHowOftenLassoBest
-
-
-showBoxPlots <- function(rawData, deriv = 0, interior = FALSE){
+showBoxPlots <- function(rawData, deriv = NULL,
+                         interior = FALSE, showOutliers = TRUE){
+  
   if(interior == TRUE){columnShift <- 4}
   else{columnShift <- 0}
   
-  allData <- unlist(c(rawData[[deriv+1]][1+columnShift],
-               rawData[[deriv+1]][2+columnShift],
-               rawData[[deriv+1]][3+columnShift]))
-  ylim <- c(0, max(allData))
+  if(is.null(deriv) == FALSE){
+    lasso <- rawData[[deriv+1]][1+columnShift]
+    ridge <- rawData[[deriv+1]][2+columnShift]
+    locPoly <- rawData[[deriv+1]][3+columnShift]
+    
+    par(mfrow=c(1,1))
+    boxplot(c(lasso, ridge, locPoly),
+            main = "Comparing LPR Methods", ylab='MSE',
+            names=c("Lasso", "Ridge", "LocPoly"))
+  }else{
+    par(mfrow=c(2,2))
+    for(i in 0:3){
+      nextDeriv <- c(rawData[[i+1]][1+columnShift],
+                     rawData[[i+1]][2+columnShift],
+                     rawData[[i+1]][3+columnShift])
+      title <- paste("Derivative ", i)
+      boxplot(nextDeriv, main = title, ylab='MSE', yaxt='n', outline=showOutliers,
+              names = c("Lasso", "Ridge", "LocPoly"))
+    }
+    par(mfrow=c(1,1))
+  }
   
-  par(mfrow=c(1,3))
-  boxplot(rawData[[deriv+1]][1+columnShift], main='Lasso', ylim=ylim)
-  boxplot(rawData[[deriv+1]][2+columnShift], main="Ridge", ylim=ylim)
-  boxplot(rawData[[deriv+1]][3+columnShift], main="LocPoly", ylim=ylim)
-  par(mfrow=c(1,1))
 }
-showBoxPlots(MSEData, 0, FALSE)
 
-showBoxPlots(listOfSimulations[[3]][['MSEData']], 0, FALSE)
+showBoxPlots(listOfSimulations[[5]][['MSEData']], NULL, TRUE)
+saveRDS(listOfSimulations, file="CompleteLassoLPRData.R")
+
+
+
 
 ###Calculate "Average Curve" after 1000 sims
 

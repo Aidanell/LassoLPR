@@ -3,7 +3,7 @@
 DataMatrixInt <- matrix(nrow=12, ncol=4)
 for(i in 1:12){
   for(j in 1:4){
-    DataMatrixInt[i,j] <- prop.table(table(listOfSimulations[[i]][["MSEData"]][[j]][,4]))[1]
+    DataMatrixInt[i,j] <- prop.table(table(listOfSimulations[[i]][["MSEData"]][[j]][,4]))['1']
   }
 }
 
@@ -15,19 +15,35 @@ DataMatrixInt
 view(DataMatrix)
 saveRDS(DataMatrix, file="PercentageLassoDidBestTable.R")
 
-#Getting the percentage of times Lasso was the leading method for each simulation
-DataMatrix <- matrix(nrow=12, ncol=4)
-for(i in 1:12){
-  for(j in 1:4){
-    DataMatrix[i,j] <- prop.table(table(SimData[[i]][[j]][,5]))[1]
+
+
+
+calcLassoPerformance <- function(simData, interior = FALSE){
+  DataMatrix <- matrix(nrow=12, ncol=4)
+  if(interior == TRUE){rankRow <- 8}
+  else{rankRow <- 4}
+  
+  for(i in 1:12){
+    for(j in 1:4){
+      DataMatrix[i,j] <- prop.table(table(simData[[i]][["MSEData"]][[j]][,rankRow]))['1']
+    }
   }
+  
+  colnames(DataMatrix) <- c("0th Deriv", "1st Deriv", "2nd Deriv", "3rd Deriv")
+  rownames(DataMatrix) <- c("Peak: 100", "Peak: 250", "Peak: 500", "Peak: 1000",
+                               "Sine: 100", "Sine: 250", "Sine: 500", "Sine: 1000",
+                               "Bimodal: 100", "Bimodal: 250", "Bimodal: 500", "Bimodal: 1000")
+  
+  return(DataMatrix)
 }
 
-colnames(DataMatrix) <- c("0th Deriv", "1st Deriv", "2nd Deriv", "3rd Deriv")
-rownames(DataMatrix) <- c("Peak: 100", "Peak: 250", "Peak: 500", "Peak: 1000",
-                             "Sine: 100", "Sine: 250", "Sine: 500", "Sine: 1000",
-                             "Bimodal: 100", "Bimodal: 250", "Bimodal: 500", "Bimodal: 1000")
-DataMatrix
+lassoPerformTable<- calcLassoPerformance(listOfSimulations, FALSE)
+lassoIntPerformTable <- calcLassoPerformance(listOfSimulations, TRUE)
+saveRDS(lassoPerformTable, file="lassoPerformTable.R")
+saveRDS(lassoIntPerformTable, file="lassoIntPerformTable.R")
+
+
+
 
 
 
@@ -53,11 +69,3 @@ ComparingMethodList
 
 saveRDS(ComparingMethodList, file="PercentDifferenceTables.R")
 
-
-prop.table(table(SimData[[1]][[1]][,5]))
-SimData[[1]][[1]]
-
-
-#Other Data Analysis ideas
-
-#- BoxPlot of MSE for each simulation, colored by the method
