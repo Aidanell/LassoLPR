@@ -289,8 +289,8 @@ testLassoEpan <- LPRSmoothingEpan(equation = peak,
                           right = 1,
                           numTerms = 10,
                           sigma = sqrt(0.5),
-                          numPoints = 100,
-                          seed=40)
+                          numPoints = 1000,
+                          seed=830608)
 testLassoEpan
 
 

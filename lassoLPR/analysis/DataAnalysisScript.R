@@ -15,7 +15,7 @@ showBoxPlots <- function(rawData, deriv = NULL,
     ridge <- rawData[[deriv+1]][2+columnShift]
     locPoly <- rawData[[deriv+1]][3+columnShift]
     
-    par(mfrow=c(1,1))
+    par(mfrow=c(1,1), mar=c(0,0,0,0))
     boxplot(c(lasso, ridge, locPoly),
             main = "Comparing LPR Methods", ylab='MSE',
             names=c("Lasso", "Ridge", "LocPoly"))
@@ -26,7 +26,7 @@ showBoxPlots <- function(rawData, deriv = NULL,
                      rawData[[i+1]][2+columnShift],
                      rawData[[i+1]][3+columnShift])
       title <- paste("Derivative ", i)
-      boxplot(nextDeriv, main = title, ylab='MSE', yaxt='n', outline=showOutliers,
+      boxplot(nextDeriv, main = title, ylab='MSE', outline=showOutliers,
               names = c("Lasso", "Ridge", "LocPoly"))
     }
     par(mfrow=c(1,1))
@@ -34,8 +34,33 @@ showBoxPlots <- function(rawData, deriv = NULL,
   
 }
 
-showBoxPlots(listOfSimulations[[5]][['MSEData']], NULL, TRUE)
+showBoxPlots(listOfSimulations[[5]][['MSEData']], NULL, TRUE, FALSE)
+
+
 saveRDS(listOfSimulations, file="CompleteLassoLPRData.R")
+
+
+
+
+################Violin Plots
+library(ggplot2)
+data <- data.frame(listOfSimulations[[4]][["MSEData"]][[1]])
+data
+ggplot(data, aes(x=Seed, y=LassoMSE)) + geom_violin()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -71,10 +96,12 @@ which.min(unlist(MSEData[[1]]['LassoMSE']))
 MSEData[[1]]["Seed"][343,]
 
 
+#Finding Min Index
+which.min(unlist(listOfSimulations[[4]][["MSEData"]][[1]]['LassoMSE']))
 
+#Finding seed given min Index
+listOfSimulations[[4]][["MSEData"]][[1]]["Seed"][343,]
 
-
-
-
+#Finding Error given index
 
 

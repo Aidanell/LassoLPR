@@ -42,9 +42,11 @@ lassoIntPerformTable <- calcLassoPerformance(listOfSimulations, TRUE)
 saveRDS(lassoPerformTable, file="lassoPerformTable.R")
 saveRDS(lassoIntPerformTable, file="lassoIntPerformTable.R")
 
+lassoPerformTable
 
 
-
+differenceTable <- lassoIntPerformTable - lassoPerformTable
+differenceTable
 
 
 
