@@ -3,10 +3,18 @@ library(KernSmooth)
 library(stats)
 library(epandist)
 
-
-#This file explores how the lambas change as you perform local lasso regression
-#on the function. Can plot the magnitude of the lambda across the functions domain
-
+#**READ FIRST**
+#This file is the most complete and up-to-date simulation for the Lasso.
+#It consists of the LPRSmoothingEpan method which calls all the other
+#methods in the file. This method generates fake data, performs lasso, ridge,
+#and local polynomial regression on the data, plots the data, and calculates errors.
+#Running the script is done at the bottom under the #"Running the Script" section.
+#Here you can change parameters such as the 
+#number of datapoints, standard deviation, type of equation, and seed if needed.
+#It outputs a data object that contains all information about the simulated data, 
+#and the models and it's errors. It also has the added feature of recording
+#the lambas used throughout the lasso regression and can be used for further
+#analysis
 
 
 #Unused Methods----
@@ -287,9 +295,11 @@ LPRSmoothingEpan <- function(
     lassoData[[i]] <- data
   }
   
-  lassoData[[5]] <- listOfLambdas
+  lassoData[[5]] <- listOfLambdas #For plotting lambas
   return(lassoData)
 }
+
+#Running the script----
 
 #The three expressions that were tested
 peak <- expression(2-5*x +5*exp(-400*(x-0.5)**2))
@@ -297,6 +307,7 @@ sine <- expression(sin(5*pi*x))
 bimodal <- expression(0.3*exp(-4*(4*x-1)**2)+0.7*exp(-16*(4*x-3)**2))
 
 
+#Run a Lasso vs Ridge vs Locpoly simulation
 testLassoEpan <- LPRSmoothingEpan(equation = peak,
                                   left = 0,
                                   right = 1,
@@ -305,7 +316,13 @@ testLassoEpan <- LPRSmoothingEpan(equation = peak,
                                   numPoints = 500,
                                   seed=50)
 
-dev.off()
-plot(seq(0,1,length.out=401), testLassoEpan[[5]], type='l')
+#Check Errors for 0th derivative
+testLassoEpan[[1]]$LassoError
+testLassoEpan[[1]]$RidgeError
+testLassoEpan[[1]]$LocpolyError
+
+###Run this to plot lambas after running LPRSmoothingEpan
+#dev.off()
+#plot(seq(0,1,length.out=401), testLassoEpan[[5]])
 
      
