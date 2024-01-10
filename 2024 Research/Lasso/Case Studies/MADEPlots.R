@@ -65,6 +65,7 @@ buildFeatureMatrix <- function(midpoint, numTerms, xValues){
 
 #Running the Script----
 #Script parameters
+set.seed(20)
 n <- 200
 sigma <- 0.5
 equation <- expression(x + 2 * exp(-16*(x**2)))
@@ -76,15 +77,16 @@ x <- seq(left, right, length.out=401)
 gridpointsY <- eval(equation)
 gridpointsX <- x
 
-#Bandwidths
-bandwidth <- dpill(x,y)
-lassoBandwidth <- bandwidth * 8
 
 #Preparing simulated data                     
-x <- sort(runif(numPoints, min=left, max=right))
+x <- sort(runif(n, min=left, max=right))
 noise <- rnorm(n = length(x), mean = 0, sd = sigma)
 exactY <- eval(equation)
 y <- exactY + noise
+
+#Bandwidths
+bandwidth <- dpill(x,y)
+lassoBandwidth <- bandwidth * 8
 
 #Computing Non-parametric regression techniques
 lassoOutput <- lassoLPR(x, y, lassoBandwidth, gridpointsX)
@@ -93,13 +95,21 @@ locpolyOutput <- locpoly(x, y, bandwidth = bandwidth, degree=1)
 #Computing Ratio data
 LassoMADE <- abs(lassoOutput[[1]][,1] - gridpointsY)
 LocpolyMADE <- abs(as.numeric(unlist(locpolyOutput$y)) - gridpointsY)
-MADEratio <- LassoMADE / LocpolyMADE
+MADEratio <- LocpolyMADE / LassoMADE
 
 #Plotting
 par(mfrow=c(1,2))
 plot(x,exactY, type='l')
-lines(gridpoints, lassoOutput[[1]][,1], col='red')
+lines(gridpointsX, lassoOutput[[1]][,1], col='red')
 lines(locpolyOutput, col='blue')
-plot(gridpointsY, MADEratio, ylim=c(0,2))
+points(x,y, pch=20)
+plot(gridpointsX, MADEratio, ylim=c(0,5), pch=20)
+abline(h=1, col='darkgreen')
 
+# 
+# #Getting first derivative
+# locpolyDer <- locpoly(x, y, bandwidth = bandwidth, degree=1, drv=1)
+# curve(1 - 64*x*exp(-16*(x**2)), from=-2, to=2)
+# lines(locpolyDer, col='blue')
+# lines(gridpointsX, lassoOutput[[1]][,2], col='red')
 
