@@ -140,7 +140,7 @@ runMADESimulations <- function(numIter){
   return(MADEData)
 }
 
-MADESim <- runMADESimulations(40)
+MADESim <- runMADESimulations(2)
 
 
 
@@ -156,4 +156,10 @@ plot(gridpoints, apply(MADESim[[1]], 1, mean, na.rm=TRUE), pch=20, main="Average
 abline(h=1, col='darkgreen')
 plot(gridpoints, apply(MADESim[[2]], 1, mean, na.rm=TRUE), pch=20, main="Average MADE ratio of First Derivative", ylim=c(0,10))
 abline(h=1, col='darkgreen')
+
+
+
+
+
+
 

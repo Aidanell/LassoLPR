@@ -98,12 +98,13 @@ LocpolyMADE <- abs(as.numeric(unlist(locpolyOutput$y)) - gridpointsY)
 MADEratio <- LocpolyMADE / LassoMADE
 
 #Plotting
-par(mfrow=c(1,2))
+dev.off()
+par(mfrow=c(1,1))
 plot(x,exactY, type='l')
 lines(gridpointsX, lassoOutput[[1]][,1], col='red')
 lines(locpolyOutput, col='blue')
 points(x,y, pch=20)
-plot(gridpointsX, MADEratio, ylim=c(0,5), pch=20)
+plot(gridpointsX, MADEratio, pch=20)
 abline(h=1, col='darkgreen')
 
 # 
