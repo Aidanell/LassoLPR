@@ -12,7 +12,7 @@ lassoLPR <- function(x, y, bandwidth, evaluatePoints, numDerivatives = 10){
     X <- buildFeatureMatrix(point, numTerms = numDerivatives, x)
     weights <- computeWeights(x, midpoint = point, bandwidth)
     
-    lassoFit <- cv.glmnet(X, y, weights = weights, standardize=TRUE, alpha=1)
+    lassoFit <- cv.glmnet(X, y, weights = weights, standardize=FALSE, alpha=1)
     # Selects the desired coefficients with penalty lambda
     lassoCoef <- coef(lassoFit, s="lambda.min")
     ListOfLambdas <- c(ListOfLambdas, lassoFit$lambda.min)
@@ -99,6 +99,5 @@ lines(pointstoEvaluateAt, motorLasso[[1]][,1], col='red')
 # motorLocPoly2nd <- locpoly(motorcycle[,1], motorcycle[,2], bandwidth = bandwidth, drv=2)
 # plot(pointstoEvaluateAt, motorLasso[[1]][,3], col='red', type='l')
 # lines(motorLocPoly2nd, type='l')
-# 
-
-
+#
+motorLasso[[1]]
