@@ -269,7 +269,7 @@ LPRSmoothingEpan <- function(
     # lines(evalPoints, ridgeOutput[,4], col='green')
     # lines(ErrList[[4]]$locpolyFit, col='blue')
     
-    plot(seq(left, right,length.out=401), listOfLambdas, pch=20)
+    plot(seq(left, right,length.out=401), listOfLambdas, pch=20, main="Lambda Magnitude")
     
     #Legend
     par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE)
@@ -293,7 +293,7 @@ LPRSmoothingEpan <- function(
                  "LassoError"=ErrList[[i]]$LassoError, "RidgeError"=ErrList[[i]]$RidgeError,
                  "LocpolyError" = ErrList[[i]]$locpolyError, "LassoIntError" = ErrList[[i]]$LassoIntError, 
                  "RidgeIntError"=ErrList[[i]]$RidgeIntError, "LocpolyIntError"=ErrList[[i]]$locpolyIntError,
-                 "x" = xpoints, "y" = y)
+                 "x" = xpoints, "y" = y, "DerivList" = derivList[i], "EvalPoints" = x)
     lassoData[[i]] <- data
   }
   
@@ -330,14 +330,16 @@ testLassoEpan[[1]]$LocpolyError
 dev.off()
 plot(seq(0,1,length.out=401), testLassoEpan[[5]], pch=20, ylim=c(0,0.015))
 
-xValues <- seq(0,1,length.out=401)
-xValues1 <- xValues[which(xValues <= 0.4)]
-xValues2 <- xValues[which(xValues > 0.4)]
-#
-yValues1 <- 0.01*(xValues1-0.4)**2 + 0.0003
-yValues2 <- 0.05*(xValues2-0.4)**2 + 0.0003
-
-lines(xValues1, yValues1)
-lines(xValues2, yValues2)
-lambdasToUse <- c(yValues1, yValues2)
+smoothedLambas <- lowess(seq(0,1,length.out=401), testLassoEpan[[5]])$y
+test
+# xValues <- seq(0,1,length.out=401)
+# xValues1 <- xValues[which(xValues <= 0.4)]
+# xValues2 <- xValues[which(xValues > 0.4)]
+# 
+# yValues1 <- 0.01*(xValues1-0.4)**2 + 0.0003
+# yValues2 <- 0.05*(xValues2-0.4)**2 + 0.0003
+# 
+# lines(xValues1, yValues1)
+# lines(xValues2, yValues2)
+# lambdasToUse <- c(yValues1, yValues2)
 
