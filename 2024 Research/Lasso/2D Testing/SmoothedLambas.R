@@ -161,13 +161,15 @@ computeRegularizationMethods <- function(x,y ,lassoBandwidth, ridgeBandwidth,
     lassoWeights <- computeWeights(x, currentPoint, lassoBandwidth)
     ridgeWeights <- computeWeights(x, currentPoint, ridgeBandwidth)
     
-    lassoFit <- cv.glmnet(X, y, weights = lassoWeights, standardize=TRUE, alpha=1, maxit=10**7)
+    lassoFit <- glmnet(X, y, weights = lassoWeights, standardize=TRUE, alpha=1, maxit=10**7)
     ridgeFit <- cv.glmnet(X, y, weights = ridgeWeights, standardize=TRUE, alpha=0)
     
-    ListOfLambdas <- c(ListOfLambdas, lassoFit$lambda.min)
+    ListOfLambdas <- c(ListOfLambdas, lambdasToUse[i])
     
     # Selects the desired coefficients with penalty lambda
-    lassoCoef <- coef(lassoFit, s="lambda.min")
+    print(i)
+    print(lambdasToUse[i])
+    lassoCoef <- coef(lassoFit, s=lambdasToUse[i])
     ridgeCoef <- coef(ridgeFit, s="lambda.min")
     
     #The i'th row contains all derivative estimation at that specificed evalpoint
@@ -228,17 +230,17 @@ LPRSmoothingEpan <- function(
   ErrList <- vector(mode='list', length=4)
   
   for(i in 1:4){
-
+    
     #Computes locpoly estimation and it's errors
     ErrorData <- ComputeLocPolyMethods(x=x, y=y, trueEquation = derivList[i],
                                        drv = i-1, bandwidth = locpolyBandwdith)
-
+    
     #Calculates and Appends Ridge/Lasso MSE to datatable
     ErrorData$LassoError <- findError(derivList[i], evalPoints, lassoOutput[,i])
     ErrorData$LassoIntError <- findInteriorError(derivList[i], evalPoints, lassoOutput[,i])
     ErrorData$RidgeError <- findError(derivList[i], evalPoints, ridgeOutput[,i])
     ErrorData$RidgeIntError <- findInteriorError(derivList[i], evalPoints, ridgeOutput[,i])
-
+    
     ErrList[[i]] <- ErrorData
   }
   
@@ -313,6 +315,7 @@ bimodal <- expression(0.3*exp(-4*(4*x-1)**2)+0.7*exp(-16*(4*x-3)**2))
 poly <- expression(x**3 - 1.5*x**2 + 0.7)
 
 #Run a Lasso vs Ridge vs Locpoly simulation
+lambdasToUse <- c(yValues1, yValues2)
 testLassoEpan <- LPRSmoothingEpan(equation = poly,
                                   left = -0.6,
                                   right = 1.4,
@@ -327,17 +330,6 @@ testLassoEpan[[1]]$RidgeError
 testLassoEpan[[1]]$LocpolyError
 
 ###Run this to plot lambas after running LPRSmoothingEpan
-dev.off()
-plot(seq(0,1,length.out=401), testLassoEpan[[5]], pch=20, ylim=c(0,0.015))
-
-xValues <- seq(0,1,length.out=401)
-xValues1 <- xValues[which(xValues <= 0.4)]
-xValues2 <- xValues[which(xValues > 0.4)]
-#
-yValues1 <- 0.01*(xValues1-0.4)**2 + 0.0003
-yValues2 <- 0.05*(xValues2-0.4)**2 + 0.0003
-
-lines(xValues1, yValues1)
-lines(xValues2, yValues2)
-lambdasToUse <- c(yValues1, yValues2)
+#dev.off()
+#plot(seq(0,1,length.out=401), testLassoEpan[[5]], pch=20, ylim=c(0,0.015))
 
