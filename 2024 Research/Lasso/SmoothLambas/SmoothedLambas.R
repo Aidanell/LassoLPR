@@ -138,8 +138,13 @@ SmoothedLambdasLPR <- function(
     return(list(lassoOutput, ridgeOutput, ListOfLambdas))
   }
   
-  lassoData <- vector(mode='list', length=5) #Initializing Data structure to return at the end
+  ####Setting Seed#####
+  lassoData <- vector(mode='list', length=6) #Initializing Data structure to return at the end
   if(is.null(seed) == FALSE){set.seed(seed)} #Set seed if specified
+  else{
+    seed <- runif(1, min=0, max=9000000)
+    set.seed(seed)
+  }
   
   
   #Calculates all the derivatives needed for plotting exact functions and calculating errors
@@ -209,6 +214,7 @@ SmoothedLambdasLPR <- function(
   }
   
   lassoData[[5]] <- listOfLambdas #For plotting lambas
+  lassoData[[6]] <- seed
   return(lassoData)
 }
 
