@@ -213,7 +213,7 @@ SmoothedLambdasLPR <- function(
     lassoData[[i]] <- data
   }
   
-  lassoData[[5]] <- listOfLambdas #For plotting lambas
+  lassoData[[5]] <- listOfLambdas #For plotting lambdas
   lassoData[[6]] <- seed
   return(lassoData)
 }
