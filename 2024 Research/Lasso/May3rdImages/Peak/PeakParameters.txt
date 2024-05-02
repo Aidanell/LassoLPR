@@ -1,0 +1,9 @@
+peak <- expression(2-5*x +5*exp(-400*(x-0.5)**2))
+equation = peak
+left = 0
+right = 1
+degree = 10
+sigma = sqrt(0.5)
+n = 500
+numEvalPoints <- 401
+seed=1

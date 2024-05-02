@@ -6,7 +6,7 @@ library(epandist)
 
 
 #Main Method----
-RunLPRSimulation<- function(
+RunWithinBandwidthLPRSimulation<- function(
     equation,   # The mathematical expression our data comes from
     left,       # Left endpoint of window
     right,      # Right endpoint of window
@@ -102,13 +102,16 @@ RunLPRSimulation<- function(
     for(i in 1:length(evalPoints)){
       currentPoint <- evalPoints[i]
       
-      X <- buildFeature(currentPoint, numTerms, x)
+      xWithinBandwidth <- x[abs(x-currentPoint) < bandwidth]
+      yWithinBandwidth <- y[abs(x-currentPoint) < bandwidth]
+      print(length(xWithinBandwidth))
+      X <- buildFeature(currentPoint, numTerms, xWithinBandwidth)
       
-      lassoWeights <- computeWeights(x, currentPoint, lassoBandwidth)
-      ridgeWeights <- computeWeights(x, currentPoint, ridgeBandwidth)
+      lassoWeights <- computeWeights(xWithinBandwidth, currentPoint, lassoBandwidth)
+      ridgeWeights <- computeWeights(xWithinBandwidth, currentPoint, ridgeBandwidth)
       
-      lassoFit <- cv.glmnet(X, y, weights = lassoWeights, standardize=TRUE, alpha=1, maxit=10**7)
-      ridgeFit <- cv.glmnet(X, y, weights = ridgeWeights, standardize=TRUE, alpha=0)
+      lassoFit <- cv.glmnet(X, yWithinBandwidth, weights = lassoWeights, standardize=TRUE, alpha=1, maxit=10**7)
+      ridgeFit <- cv.glmnet(X, yWithinBandwidth, weights = ridgeWeights, standardize=TRUE, alpha=0)
       
       ListOfLambdas <- c(ListOfLambdas, lassoFit$lambda.min)
       
@@ -124,7 +127,7 @@ RunLPRSimulation<- function(
   }
   
   computeSmoothLasso <- function(x,y ,lassoBandwidth, ridgeBandwidth, 
-                                           evalPoints, numTerms, lambdas){
+                                 evalPoints, numTerms, lambdas){
     
     lassoOutput <- matrix(nrow=401, ncol=numTerms+1)
     ridgeOutput <- matrix(nrow=401, ncol=numTerms+1)
@@ -134,13 +137,15 @@ RunLPRSimulation<- function(
     for(i in 1:length(evalPoints)){
       currentPoint <- evalPoints[i]
       
-      X <- buildFeature(currentPoint, numTerms, x)
+      xWithinBandwidth <- x[abs(x-currentPoint) < bandwidth]
+      yWithinBandwidth <- y[abs(x-currentPoint) < bandwidth]
+      X <- buildFeature(currentPoint, numTerms, xWithinBandwidth)
       
-      lassoWeights <- computeWeights(x, currentPoint, lassoBandwidth)
-      ridgeWeights <- computeWeights(x, currentPoint, ridgeBandwidth)
+      lassoWeights <- computeWeights(xWithinBandwidth, currentPoint, lassoBandwidth)
+      ridgeWeights <- computeWeights(xWithinBandwidth, currentPoint, ridgeBandwidth)
       
-      lassoFit <- glmnet(X, y, weights = lassoWeights, standardize=TRUE, alpha=1, maxit=10**7)
-      ridgeFit <- glmnet(X, y, weights = ridgeWeights, standardize=TRUE, alpha=0)
+      lassoFit <- glmnet(X, yWithinBandwidth, weights = lassoWeights, standardize=TRUE, alpha=1, maxit=10**7)
+      ridgeFit <- glmnet(X, yWithinBandwidth, weights = ridgeWeights, standardize=TRUE, alpha=0)
       
       ListOfLambdas <- c(ListOfLambdas, lambdas[i])
       
@@ -232,9 +237,9 @@ RunLPRSimulation<- function(
   x <- evalPoints #for plotting exact functions 
   
   ##############Returning Data################################
-    
+  
   SimulatedData <- list("x" = xpoints, "y" = y)
-    
+  
   lassoObject <- list("simulatedData"=SimulatedData, "lassoOutput"=lassoOutput,
                       "ridgeOutput"=ridgeOutput, "locpolyOutput"=locpolyOutput,
                       "smoothLassoOutput"=smoothLambdaOutput,"errorTable"=ErrorTable,
@@ -286,17 +291,16 @@ poly <- expression(80*(x-0.5)**3 - 5*(x-0.5) + 0.5)
 # right = 1.4
 
 #Run a Lasso vs Ridge vs Locpoly simulation
-testLassoEpan <- RunLPRSimulation(equation = poly,
+WithinBandLasso <- RunWithinBandwidthLPRSimulation(equation = peak,
                                   left = 0,
                                   right = 1,
                                   numTerms = 10,
-                                  sigma = 2,
+                                  sigma = sqrt(0.5),
                                   numPoints = 500,
-                                  seed=42)
+                                  seed=1)
 
 testLassoEpan
 par(mfrow=c(2,2))
 for(i in 0:3){
   plotData(testLassoEpan, deriv=i)
 }
-

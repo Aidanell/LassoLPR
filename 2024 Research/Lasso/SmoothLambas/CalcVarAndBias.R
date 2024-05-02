@@ -33,4 +33,4 @@ for(i in 1:numExperiments){
 }
 
 
-plotBiasAndVar(listOfExperiments, deriv=3)
+plotBiasAndVar(listOfExperiments, deriv=1)
