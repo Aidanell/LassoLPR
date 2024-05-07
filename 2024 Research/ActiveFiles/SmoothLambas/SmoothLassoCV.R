@@ -286,13 +286,13 @@ poly <- expression(80*(x-0.5)**3 - 5*(x-0.5) + 0.5)
 # right = 1.4
 
 #Run a Lasso vs Ridge vs Locpoly simulation
-testLassoEpan <- RunLPRSimulation(equation = poly,
+testLassoEpan <- RunLPRSimulation(equation = peak,
                                   left = 0,
                                   right = 1,
                                   numTerms = 10,
-                                  sigma = 2,
+                                  sigma = sqrt(0.5),
                                   numPoints = 500,
-                                  seed=42)
+                                  seed=65)
 
 testLassoEpan
 par(mfrow=c(2,2))

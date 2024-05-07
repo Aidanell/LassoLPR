@@ -25,7 +25,7 @@ PRESS.cv <- function(observedX, observedY, X, weights){
     
     yhat <- predict(fit, newx=X, s=lambdas[i])
     
-    PRESSVector <- ((yhat-observedY)/(1-Hdiag))**2 * (weights/totalWeights)
+    PRESSVector <- ((yhat-observedY)/(1-Hdiag))**2 * weights
     PRESSStat <- sum(PRESSVector)
     AllPressStats[i] <- PRESSStat
   }

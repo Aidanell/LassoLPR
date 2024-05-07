@@ -1,0 +1,9 @@
+poly <- expression(80*(x-0.5)**3 - 5*(x-0.5) + 0.5)
+equation = poly
+left = 0
+right = 1
+degree = 10
+sigma = 2
+n = 500
+numEvalPoints <- 401
+seed=57
