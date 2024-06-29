@@ -63,7 +63,7 @@ legend(x='topleft', legend=c("PRESSLASSO", "CVLasso", "SmoothedLambdaCVLasso"),
 Derivatives <- derivCalc(equation, degree)
 
 #J'th derivative
-j <-3
+j <-0
 #Getting true curve
 x <- evalPoints
 trueFunction <- Derivatives[j+1]
