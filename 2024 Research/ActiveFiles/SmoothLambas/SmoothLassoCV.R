@@ -291,8 +291,8 @@ testLassoEpan <- RunLPRSimulation(equation = peak,
                                   right = 1,
                                   numTerms = 10,
                                   sigma = sqrt(0.5),
-                                  numPoints = 250,
-                                  seed=420)
+                                  numPoints = 100,
+                                  seed=4)
 
 testLassoEpan
 par(mfrow=c(2,2))
@@ -300,4 +300,3 @@ for(i in 0:3){
   plotData(testLassoEpan, deriv=i)
 }
 
-testLassoEpan$smoothLassoOutput[,1]

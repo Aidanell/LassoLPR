@@ -5,7 +5,8 @@
 
 #If lasso does better with the same lambda used in ridge rule of thumb
 #then lasso should be better
-
+left <- 0
+right <- 1
 numTerms <- 10
 numPoints = 500
 set.seed(100)
@@ -102,7 +103,7 @@ y <- exactY + noise
 
 ####Bandwidth Calculations----
 #For Epanechnikov kernel, max(K(u)) = 3/4 and R(K) = 1/2
-#Therefore bandwidth = 5*delta)/16
+#Therefore ridge parameter = 5*delta/16h
 
 locpolyBandwidth <- dpill(x,y)
 lassoBandwidth <- locpolyBandwidth*8
@@ -129,7 +130,7 @@ for(i in 1:length(evalPoints)){
   lassoFit <- glmnet(X, y, weights = lassoWeights, standardize=TRUE, alpha=1, maxit=10**7)
   ridgeFit <- glmnet(X, y, weights = lassoWeights, standardize=TRUE, alpha=0, maxit=10**7)
   
-  ListOfLambdas <- c(ListOfLambdas, lassoFit$lambda.min)
+  #ListOfLambdas <- c(ListOfLambdas, lassoFit$lambda.min)
   
   RidgeThumb = 5*abs(currentPoint - XTilde)/(16*lassoBandwidth)
   
@@ -142,7 +143,7 @@ for(i in 1:length(evalPoints)){
   lassoOutput[i, ] <- as.vector(lassoCoef)
   ridgeOutput[i, ] <- as.vector(ridgeCoef) 
   
-  lambdaTracking <- c(lambdas, RidgeThumb)
+  lambdaTracking <- c(lambdaTracking, RidgeThumb)
   XTildeTracking <- c(XTildeTracking, XTilde)
 }
 
@@ -152,7 +153,7 @@ for(i in 1:length(evalPoints)){
 
 plot(evalPoints, lassoOutput[,1], main="Beta0 Lasso")
 plot(evalPoints, ridgeOutput[,1], main="Beta0 Ridge")
-plot(evalPoints, lambdas, main="Lambdas")
+plot(evalPoints, lambdaTracking, main="Lambdas")
 plot(evalPoints, XTildeTracking, main="XTilde")
 plot(x,y)
 lines(evalPoints, lassoOutput[,1], col='red', lwd=3)

@@ -50,15 +50,7 @@ singleSpatialRidge <- function(x, xTilde, weights, rXtilde, x0){
   s2 <- calcSj(2, x, xTilde, weights)
   s1Star <- calcSjStar(1, x, xTilde, weights)
   s2Star <- calcSjStar(2, x, xTilde, weights)
-  
-  
-  
-  ###TEMPORARY TESTING - see if with perfect info, it works
-  #print(rXtilde - peakDerivative(xTilde))
-  print(rXtilde)
-  rXTile <- peakDerivative(xTilde)
-  
-  
+
   
   
   #Now use formula to get RbarOpt

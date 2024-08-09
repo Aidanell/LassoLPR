@@ -7,8 +7,8 @@
 #then lasso should be better
 
 numTerms <- 10
-numPoints = 250
-set.seed(420)
+numPoints = 100
+set.seed(4)
 bimodal <- expression(0.3*exp(-4*(4*x-1)**2)+0.7*exp(-16*(4*x-3)**2)) #sigma = 0.1
 peak <- expression(2-5*x +5*exp(-400*(x-0.5)**2)) # sigma = sqrt(0.5)
 sine <- expression(sin(5*pi*x)) #sigma = 0.5
@@ -197,7 +197,7 @@ lines(evalPoints, SpatialRidgeOutput[,1], col='red', lwd=3)
 lines(evalPoints, ridgeOutput[,1], col='blue', lwd=3)
 
 plot(evalPoints, SpatialRidge, ylim=c(0,3), main="Spatial Lambdas (Red) vs Thumb Lambdas (Blue)", col='red')
-points(evalPoints, lambdas, main="Thumb Lambdas", col="blue")
+plot(evalPoints, lambdaTracking, main="Thumb Lambdas", col="blue")
 points(evalPoints, testLassoEpan$lambdas$smoothed, col='orange')
 points(evalPoints, testLassoEpan$lambdas$unsmoothed, col='purple')
 
