@@ -8,7 +8,7 @@
 
 numTerms <- 10
 numPoints = 100
-set.seed(4)
+set.seed(47)
 bimodal <- expression(0.3*exp(-4*(4*x-1)**2)+0.7*exp(-16*(4*x-3)**2)) #sigma = 0.1
 peak <- expression(2-5*x +5*exp(-400*(x-0.5)**2)) # sigma = sqrt(0.5)
 sine <- expression(sin(5*pi*x)) #sigma = 0.5

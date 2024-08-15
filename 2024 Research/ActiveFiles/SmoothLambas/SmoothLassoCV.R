@@ -176,9 +176,13 @@ RunLPRSimulation<- function(
   
   #dpill returns estimated optimal bandwidth for locpoly estimators.
   #Lasso requires a larger bandwidth and should be multiplied by a specified factor
-  locpolyBandwidth <- dpill(x,y)
-  lassoBandwidth <- locpolyBandwidth*lassoBandMulti
-  ridgeBandwidth <- locpolyBandwidth*ridgeBandMulti
+  #locpolyBandwidth <- dpill(x,y)
+  #lassoBandwidth <- locpolyBandwidth*lassoBandMulti
+  #ridgeBandwidth <- locpolyBandwidth*ridgeBandMulti
+  
+  locpolyBandwidth <- thumbBw(x,y,0,EpaK)
+  lassoBandwidth <- ridgeBandwidth <- locpolyBandwidth
+  
   
   #Points at which we calculate our non-parametric estimators
   evalPoints <- seq(left, right, length.out=401)
@@ -291,8 +295,8 @@ testLassoEpan <- RunLPRSimulation(equation = peak,
                                   right = 1,
                                   numTerms = 10,
                                   sigma = sqrt(0.5),
-                                  numPoints = 100,
-                                  seed=4)
+                                  numPoints = 250,
+                                  seed=47)
 
 testLassoEpan
 par(mfrow=c(2,2))

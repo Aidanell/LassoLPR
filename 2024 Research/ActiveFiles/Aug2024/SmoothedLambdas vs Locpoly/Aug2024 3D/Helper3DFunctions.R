@@ -52,6 +52,8 @@ buildLassoMatricies <- function(x,y,z, evalPoints, numPoints, length, Xbandwidth
   
   
   ListOfLassoMatricies <- vector(mode='list', length=10)
+  Lambdas3dList <- matrix(nrow=length, ncol=length)
+  
   for(i in 1:10){ListOfLassoMatricies[[i]] <- matrix(nrow=length, ncol=length)}
   
   for(i in 1:length){
@@ -71,16 +73,17 @@ buildLassoMatricies <- function(x,y,z, evalPoints, numPoints, length, Xbandwidth
       for(k in 1:10){
         ListOfLassoMatricies[[k]][i,j] <- lassoCoef[k]
       }
+      Lambdas3dList[i,j] <- lassoFit$lambda.min
     }
     print(i)
   }
-  return(ListOfLassoMatricies)
+  return(list(ListOfLassoMatricies, Lambdas3dList))
 }
 
 
 buildLocPolyMatricies <- function(x,y,z, degree, Xbandwidth, Ybandwidth){
   LLResult <- interp::locpoly(x,y,z, degree=degree, pd='all',
-                  h=c(Xbandwidth, Ybandwidth))
+                              h=c(Xbandwidth, Ybandwidth))
   
   ListOfLocPolyMatricies <- vector(mode='list', length=10)
   ListOfLocPolyMatricies[[1]] <- LLResult$z
@@ -93,46 +96,8 @@ buildLocPolyMatricies <- function(x,y,z, degree, Xbandwidth, Ybandwidth){
   ListOfLocPolyMatricies[[8]] <- LLResult$zxxy
   ListOfLocPolyMatricies[[9]] <- LLResult$zxyy
   ListOfLocPolyMatricies[[10]] <- LLResult$zyyy
-
+  
   return(ListOfLocPolyMatricies)
-}
-
-
-PlotData <- function(num, limits = NULL){
-  #Plotting
-  par(mfrow=c(2,2))
-  if(is.null(limits)){
-    persp(trueX, trueY, trueResult[[num]], col='lightblue',theta=30, phi=20,
-          ticktype='detailed', shade=0.3, main="Exact Graph")
-    persp(evalPoints, evalPoints, lassoResult[[num]], col='lightblue',theta=30, phi=20,
-          ticktype='detailed', shade=0.3, main="Lasso Result")
-    persp(evalPoints, evalPoints, locpolyResult[[num]], col='lightblue',theta=30, phi=20,
-          ticktype='detailed', shade=0.3, main="LocPoly Result")
-  }else{
-    persp(trueX, trueY, trueResult[[num]], col='lightblue',theta=30, phi=20,
-          ticktype='detailed', shade=0.3, main="Exact Graph", zlim=limits)
-    persp(evalPoints, evalPoints, lassoResult[[num]], col='lightblue',theta=30, phi=20,
-          ticktype='detailed', shade=0.3, main="Lasso Result", zlim=limits)
-    persp(evalPoints, evalPoints, locpolyResult[[num]], col='lightblue',theta=30, phi=20,
-          ticktype='detailed', shade=0.3, main="LocPoly Result", zlim=limits)
-  }
-  
-}
-
-
-CalculateErrors <- function(trueResult, lassoResult, locpolyResult){
-  
-  LassoError <- vector(length=10)
-  LocpolyError <- vector(length=10)
-  
-  for(i in 1:10){
-    LassoError[i] <- sum((lassoResult[[1]] - trueResult[[i]])**2) / length(lassoResult[[1]])
-    LocpolyError[i] <- sum((locpolyResult[[1]] - trueResult[[i]])**2) / length(lassoResult[[1]])
-  }
-  LassoDoesBetter <- LassoError < LocpolyError
-  AllErrorData <- data.frame("LassoMSE" = LassoError, "LocpolyMSE" = LocpolyError,
-                             "LassoBetter" = LassoDoesBetter)
-  return(AllErrorData)
 }
 
 
@@ -151,65 +116,4 @@ fxy <- function(x,y){return(2000*(2*x - 1)*(2*y - 1)*exp(-20*(y-0.5)**2 - 20*(x-
 fxxy <- function(x,y){return(-4000*(40*(x**2) - 40*x +9)*(2*y - 1)*exp(-20*(y-0.5)**2 - 20*(x-0.5)**2))}
 fxyy <- function(x,y){return(-4000*(40*(y**2) - 40*y +9)*(2*x - 1)*exp(-20*(y-0.5)**2 - 20*(x-0.5)**2))}
 
-#Script Parameters----
-length <- 40
-xylim <- c(0,1)
-numPoints <- 500
-sigma <- sqrt(0.5)
 
-#Defining matricies of true data for the function and all its derivatives----
-trueX <- trueY <- seq(xylim[1], xylim[2], length.out = length)
-trueResult <- vector(mode='list', length=10)
-trueResult[[1]] <- outer(trueX, trueY, f)
-trueResult[[2]] <- outer(trueX, trueY, fx)
-trueResult[[3]] <- outer(trueX, trueY, fy)
-trueResult[[4]] <- outer(trueX, trueY, fxx)
-trueResult[[5]] <- outer(trueX, trueY, fxy)
-trueResult[[6]] <- outer(trueX, trueY, fyy)
-trueResult[[7]] <- outer(trueX, trueY, fxxx)
-trueResult[[8]] <- outer(trueX, trueY, fxxy)
-trueResult[[9]] <- outer(trueX, trueY, fxyy)
-trueResult[[10]] <- outer(trueX, trueY, fyyy)
-
-#Script----
-#x/y values we evaluate the function at
-evalPoints <- trueX
-
-#Building Data
-x <- sort(runif(numPoints, min=xylim[1], max=xylim[2]))
-y <- runif(numPoints, min=xylim[1], max=xylim[2])
-y <- y[order(match(y, x))]
-z <- f(x, y) + rnorm(numPoints, sd=sigma)
-
-generatedData <- data.frame("x"=x, "y"=y, "z"=z)
-
-
-#Bandwidths
-Xbandwidth <- dpill(x,z) * 6
-Ybandwidth <- dpill(y,z) * 6
-
-#Building Nonparametric models
-
-lassoResult <- buildLassoMatricies(x, y, z, evalPoints, numPoints, length, Xbandwidth, Ybandwidth)
-domainSize <- xylim[2] - xylim[1]
-locpolyResult <- buildLocPolyMatricies(x,y,z, degree=3, Xbandwidth/domainSize, Ybandwidth/domainSize)
-ErrorDf <- CalculateErrors(trueResult, lassoResult, locpolyResult)
-
-#Creating object that holds all data from simulation
-LPRResults <- vector(mode="list", 0)
-LPRResults$generatedData <- generatedData
-LPRResults$ErrorDf <- ErrorDf
-LPRResults$lassoResult <- lassoResult
-LPRResults$locpolyResult <- locpolyResult
-
-#Defining xylim's to better see plots
-flim <- c(-8,2.1)
-fxlim <- c(-25, 15)
-fylim <- c(-25,15)
-fxxxlim <- c(-1500,1500)
-PlotData(2, flim)
-LPRResults
-
-
-persp(evalPoints, evalPoints, lassoResult[[2]], col='lightblue',theta=30, phi=20,
-      ticktype='detailed', shade=0.3, main="Lasso Result")
