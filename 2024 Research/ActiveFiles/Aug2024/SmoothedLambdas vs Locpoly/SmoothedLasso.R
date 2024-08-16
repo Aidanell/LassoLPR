@@ -3,8 +3,8 @@ left <- 0
 right <- 1
 
 numTerms <- 10
-numPoints = 250
-set.seed(8)
+numPoints = 1000
+set.seed(80)
 bimodal <- expression(0.3*exp(-4*(4*x-1)**2)+0.7*exp(-16*(4*x-3)**2)) #sigma = 0.1
 peak <- expression(2-5*x +5*exp(-400*(x-0.5)**2)) # sigma = sqrt(0.5)
 sine <- expression(sin(5*pi*x)) #sigma = 0.5
@@ -22,7 +22,9 @@ exactY <- eval(equation)
 y <- exactY + noise
 
 locpolyBandwidth <- thumbBw(x,y,0,gaussK)
-lassoBandwidth <- thumbBw(x,y,0,EpaK)
+#lassoBandwidth <- thumbBw(x,y,0,EpaK)
+lassoBandwidth <- dpill(x,y)*8
+#lassoBandwidth <- locpolyBandwidth
 evalPoints <- seq(left, right, length.out=401)
 
 #######Cv.Glmnet calculations########

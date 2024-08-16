@@ -34,13 +34,22 @@ epan <- function(x, bandwidth){
 
 
 #Computes the scaled kernel weights for every input x
-computeWeights <- function(x, midpoint, bandwidth){
+computeWeights <- function(x, midpoint, bandwidth, epan=TRUE){
   output <- vector(length=length(x))
+  
   for(i in 1:length(x)){
     
     diff <- abs(x[i]-midpoint) / bandwidth
     if(diff > 1){output[i] <- 0}
-    else{output[i] <- epan(diff)/ (bandwidth)}
+    
+    else{
+      if(epan){
+        output[i] <- epan(diff)/ (bandwidth)
+        
+      }else{
+        output[i] <- dnorm(diff)/bandwidth
+        }
+      }
     
   }
   return(output)
