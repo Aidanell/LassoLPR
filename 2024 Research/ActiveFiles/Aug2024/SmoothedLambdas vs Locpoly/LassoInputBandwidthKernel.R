@@ -11,7 +11,7 @@ LassoSmoothed <- function(x,y, bandwidth, epanKernal=TRUE, p){
     currentPoint <- evalPoints[i]
     
     X <- buildFeature(currentPoint, numTerms, x)
-    lassoWeights <- computeWeights(x, currentPoint, lassoBandwidth, epan=epanKernal)
+    lassoWeights <- computeWeights(x, currentPoint, bandwidth, epan=epanKernal)
     lassoFit <- cv.glmnet(X, y, weights = lassoWeights, standardize=TRUE, alpha=1, maxit=10**7)
     unsmoothedLambdas <-  c(unsmoothedLambdas, lassoFit$lambda.min)
     
@@ -29,7 +29,7 @@ LassoSmoothed <- function(x,y, bandwidth, epanKernal=TRUE, p){
     currentPoint <- evalPoints[i]
     
     X <- buildFeature(currentPoint, numTerms, x)
-    lassoWeights <- computeWeights(x, currentPoint, lassoBandwidth, epan=epanKernal)
+    lassoWeights <- computeWeights(x, currentPoint, bandwidth, epan=epanKernal)
     lassoFit <- glmnet(X, y, weights = lassoWeights, standardize=TRUE, alpha=1, maxit=10**7)
     
     # Selects the desired coefficients with penalty lambda

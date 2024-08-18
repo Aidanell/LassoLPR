@@ -40,16 +40,13 @@ computeWeights <- function(x, midpoint, bandwidth, epan=TRUE){
   for(i in 1:length(x)){
     
     diff <- abs(x[i]-midpoint) / bandwidth
-    if(diff > 1){output[i] <- 0}
     
-    else{
       if(epan){
-        output[i] <- epan(diff)/ (bandwidth)
-        
+        if(diff > 1){output[i] <- 0}
+        else{output[i] <- epan(diff)/ (bandwidth)}
       }else{
-        output[i] <- dnorm(diff)/bandwidth
+        output[i] <- dnorm(diff)
         }
-      }
     
   }
   return(output)
