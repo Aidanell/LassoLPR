@@ -1,7 +1,7 @@
 #Script Parameters----
 length <- 40
 xylim <- c(0,1)
-numPoints <- 500
+numPoints <- 250
 sigma <- sqrt(0.5)
 
 #Defining matricies of true data for the function and all its derivatives----
@@ -59,6 +59,10 @@ fxlim <- c(-25, 15)
 fylim <- c(-25,15)
 fxxxlim <- c(-1500,1500)
 
+
+smoothedLambas <- loess(as.vector(Lambdas3D) ~ evalPointsX + evalPointsY, span=0.1)$y
+
+
 persp(evalPoints, evalPoints, lassoResult[[1]], col='lightblue',theta=30, phi=20,
       ticktype='detailed', shade=0.3, main="Lasso Result")
 
@@ -67,7 +71,7 @@ persp(evalPoints, evalPoints, Lambdas3D, col='lightblue',theta=30, phi=20,
       ticktype='detailed', shade=0.3, main="Lambdas")
 
 
-persp(evalPointsX, evalPointsY, smoothedLambas, col='lightblue',theta=30, phi=20,
+persp(evalPoints, evalPoints, smoothedLambas, col='lightblue',theta=30, phi=20,
       ticktype='detailed', shade=0.3, main="Lambdas")
 
 
@@ -77,14 +81,37 @@ for(i in 1:40){
   evalPointsY <- c(evalPointsY, rep(i,40)/40)
 }
 
-smoothedLambas <- loess(as.vector(Lambdas3D) ~ evalPointsX + evalPointsY, span=0.1)$y
-#s <- scene3d(plot3d(evalPointsX, evalPointsY, as.vector(lassoResult[[1]]), type="s",  
-                    #size=1, main="hey", lit=TRUE,sub="3-D Plot"))
-#rglwidget(s)
-#d <- scene3d(plot3d(evalPointsX, evalPointsY, as.vector(Lambdas3D), lit=TRUE, type='s', 
-#                    size=1, main="Lambdas",sub="3-D Plot"))
-options(rgl.printRglwidget = TRUE)
-d <- scene3d(plot3d(evalPointsX, evalPointsY, smoothedLambas, type="s",  
-                    size=1, main="hey", lit=TRUE,sub="3-D Plot"))
-rglwidget(d)
+
+library("rgl")
+
+plot3d(evalPointsX, evalPointsY, as.vector(lassoResult[[2]]), type='s',
+       size=1, main="hey", lit=TRUE,sub="3-D Plot")
+
+
+plot3d(evalPointsX, evalPointsY, as.vector(smoothedLambas), type="s",  
+       size=1, main="Lambda Magnitude over surface", lit=TRUE,sub="3-D Plot", zlab="Lambda Magnitude")
+
+plot3d(evalPointsX, evalPointsY, as.vector(Lambdas3D), type="s",  
+       size=1, main="Lambda Magnitude over surface", lit=TRUE,sub="3-D Plot", zlab="Lambda Magnitude")
+
+
+
+plot3d(evalPointsX, evalPointsY, fxx(evalPointsX, evalPointsY), type="s",  
+       size=1, main="hey", lit=TRUE,sub="3-D Plot", zlab="Lambda Magnitude")
+
+#s <- scene3d()
+#s$par3d$windowRect <- 2*s$par3d$windowRect
+#plot3d(s)
+
+open3d()
+col <- cm.colors(20)[1 + round(19*(z - min(z))/diff(range(z)))]
+dxyz <- deldir::deldir(x=evalPointsX, y=evalPointsY, z=as.vector(lassoResult[[1]]))
+persp3d(dxyz, col = col, smooth = FALSE)
+
+
+dxyz <- deldir::deldir(x=evalPointsX, y=evalPointsY, z=f(evalPointsX, evalPointsY))
+persp3d(dxyz, col = col, smooth = FALSE)
+
+
+
 

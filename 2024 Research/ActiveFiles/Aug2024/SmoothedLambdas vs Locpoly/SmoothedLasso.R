@@ -1,3 +1,8 @@
+library(glmnet)
+library(KernSmooth)
+library(stats)
+library(epandist)
+library(locpol)
 
 left <- 0
 right <- 1
