@@ -8,7 +8,7 @@ library(locpol)
 #Script Parameters----
 gridLength <- 40 #How many grid points in each direction (i.e we will evaluate at gridLength**2 points)
 xylim <- c(0,1)
-n <- 2000
+n <- 250
 sigma <- sqrt(0.5)
 p <- 10 #How many degrees in Lasso
 
@@ -48,30 +48,34 @@ smoothLassoResult <- smoothLassoComputation(x,y,z,n,p, smoothedLambdas, Xbandwid
 
 #plotting
 col <- cm.colors(20)[1 + round(19*(z - min(z))/diff(range(z)))]
-deriv <- 5
+deriv <- 2
 
 open3d()
-dxyz2 <- deldir::deldir(x=evalPointsX, y=evalPointsY, z=lassoResult[[deriv]])
-persp3d(dxyz2, col = col, smooth = FALSE, main="Lasso Unsmoothed Lambdas")
-
-
-open3d()
-dxyz3 <- deldir::deldir(x=evalPointsX, y=evalPointsY, z=smoothLassoResult[[deriv]])
-persp3d(dxyz3, col = col, smooth = FALSE, main="Lasso Smoothed Lambdas")
-
-open3d()
-dxyz4 <- deldir::deldir(x=evalPointsX, y=evalPointsY, z=trueResults[[deriv]])
-persp3d(dxyz4, col = col, smooth = FALSE)
+dxyz1 <- deldir::deldir(x=evalPointsX, y=evalPointsY, z=lassoResult[[deriv]])
+persp3d(dxyz1, col = col, smooth = FALSE, main="Lasso Unsmoothed Lambdas")
 
 
 open3d()
-dxyz2 <- deldir::deldir(x=evalPointsX, y=evalPointsY, z=unsmoothedLambdas)
-persp3d(dxyz2, col = col, smooth = FALSE, main="Unsmoothed Lambdas")
+dxyz2 <- deldir::deldir(x=evalPointsX, y=evalPointsY, z=smoothLassoResult[[deriv]])
+persp3d(dxyz2, col = col, smooth = FALSE, main="Lasso Smoothed Lambdas")
+
+open3d()
+dxyz3 <- deldir::deldir(x=evalPointsX, y=evalPointsY, z=trueResults[[deriv]])
+persp3d(dxyz3, col = col, smooth = FALSE)
 
 
 open3d()
-dxyz3 <- deldir::deldir(x=evalPointsX, y=evalPointsY, z=smoothedLambdas)
-persp3d(dxyz3, col = col, smooth = FALSE, main="Smoothed Lambdas", axes=FALSE, box=TRUE)
+dxyz4 <- deldir::deldir(x=evalPointsX, y=evalPointsY, z=unsmoothedLambdas)
+persp3d(dxyz4, col = col, smooth = FALSE, main="Unsmoothed Lambdas")
+
+
+open3d()
+dxyz5 <- deldir::deldir(x=evalPointsX, y=evalPointsY, z=smoothedLambdas)
+persp3d(dxyz5, col = col, smooth = FALSE, main="Smoothed Lambdas", axes=FALSE, box=TRUE)
 
 
 
+#Locpoly 3D
+LLResult <- interp::locpoly(x,y,z, degree=2, pd='all', h=c(Xbandwidth, Ybandwidth))
+dxyz6 <- deldir::deldir(x=evalPointsX, y=evalPointsY, z=as.vector(LLResult$zx))
+persp3d(dxyz6, col = col, smooth = FALSE, main="Locpoly", axes=TRUE, box=TRUE)
