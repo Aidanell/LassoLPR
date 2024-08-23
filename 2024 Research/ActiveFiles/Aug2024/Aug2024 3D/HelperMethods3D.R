@@ -50,7 +50,7 @@ build2DFeature <- function(centerX, centerY, xValues, yValues, p){
     numRows <- currentP
     
     for(t in numRows:0){
-      numer <- (xValues - centerX)**2 * (yValues - centerY)**(numRows-t)
+      numer <- (xValues - centerX)**t * (yValues - centerY)**(numRows-t)
       denom <- factorial(t)*factorial(numRows-t)
       
       featureMatrix[,currentCol] <- numer/denom
@@ -113,7 +113,7 @@ smoothLassoComputation<- function(x,y,z,n,p, smoothedLambdas, Xbandwidth, Ybandw
 }
 
 
-getTrueFunctionData <- function(xylim, gridLength){
+getTrueFunctionData <- function(xylim, gridLength, evalPointsX, evalPointsY){
   #Functions for comparing derivatives----
   #NOTE: ONLY FOR PEAK FUNCTION'S FIRST THREE DERIVATIVES
   #FUNCTIONS MUST BE MANUALLY CHANGED TO COMPARE OTHER FUNCTIONS
@@ -132,18 +132,17 @@ getTrueFunctionData <- function(xylim, gridLength){
   fxyy <- function(x,y){return(-4000*(40*(y**2) - 40*y +9)*(2*x - 1)*exp(-20*(y-0.5)**2 - 20*(x-0.5)**2))}
   
   #Defining matricies of true data for the function and all its derivatives----
-  trueX <- trueY <- seq(xylim[1], xylim[2], length.out = gridLength)
   trueResult <- vector(mode='list', length=10)
-  trueResult[[1]] <- outer(trueX, trueY, f)
-  trueResult[[2]] <- outer(trueX, trueY, fx)
-  trueResult[[3]] <- outer(trueX, trueY, fy)
-  trueResult[[4]] <- outer(trueX, trueY, fxx)
-  trueResult[[5]] <- outer(trueX, trueY, fxy)
-  trueResult[[6]] <- outer(trueX, trueY, fyy)
-  trueResult[[7]] <- outer(trueX, trueY, fxxx)
-  trueResult[[8]] <- outer(trueX, trueY, fxxy)
-  trueResult[[9]] <- outer(trueX, trueY, fxyy)
-  trueResult[[10]] <- outer(trueX, trueY, fyyy)
+  trueResult[[1]] <- f(evalPointsX, evalPointsY)
+  trueResult[[2]] <- fx(evalPointsX, evalPointsY)
+  trueResult[[3]] <- fy(evalPointsX, evalPointsY)
+  trueResult[[4]] <- fxx(evalPointsX, evalPointsY)
+  trueResult[[5]] <- fxy(evalPointsX, evalPointsY)
+  trueResult[[6]] <- fyy(evalPointsX, evalPointsY)
+  trueResult[[7]] <- fxxx(evalPointsX, evalPointsY)
+  trueResult[[8]] <- fxxy(evalPointsX, evalPointsY)
+  trueResult[[9]] <- fxyy(evalPointsX, evalPointsY)
+  trueResult[[10]] <- fyyy(evalPointsX, evalPointsY)
   
   return(trueResult)
   
