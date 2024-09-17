@@ -2,13 +2,13 @@
 #This file contains helper methods used in cv.glmnet calculations
 
 # This function builds our feature matrix.
-buildFeature <- function(midpoint, numTerms, xValues){
+buildFeature <- function(midpoint, p, xValues){
   # Every j'th column is the coefficient of the (j-1)'th derivative in the
   # Taylor polynomial formed at the i'th point.
   
-  X <- matrix(nrow = length(xValues), ncol = numTerms)
+  X <- matrix(nrow = length(xValues), ncol = p-1)
   
-  for(i in 1:numTerms){
+  for(i in 1:p-1){
     X[,i] <- ((xValues - midpoint)^(i))/factorial(i)
   }
   return(X)

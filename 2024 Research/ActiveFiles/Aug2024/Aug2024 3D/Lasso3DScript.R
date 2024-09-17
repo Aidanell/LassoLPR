@@ -48,7 +48,7 @@ smoothLassoResult <- smoothLassoComputation(x,y,z,n,p, smoothedLambdas, Xbandwid
 
 #plotting
 col <- cm.colors(20)[1 + round(19*(z - min(z))/diff(range(z)))]
-deriv <- 2
+deriv <- 5
 
 open3d()
 dxyz1 <- deldir::deldir(x=evalPointsX, y=evalPointsY, z=lassoResult[[deriv]])
@@ -71,11 +71,12 @@ persp3d(dxyz4, col = col, smooth = FALSE, main="Unsmoothed Lambdas")
 
 open3d()
 dxyz5 <- deldir::deldir(x=evalPointsX, y=evalPointsY, z=smoothedLambdas)
-persp3d(dxyz5, col = col, smooth = FALSE, main="Smoothed Lambdas", axes=FALSE, box=TRUE)
+persp3d(dxyz5, col = col, smooth = FALSE, main="Smoothed Lambdas")
 
 
 
 #Locpoly 3D
-LLResult <- interp::locpoly(x,y,z, degree=2, pd='all', h=c(Xbandwidth, Ybandwidth))
-dxyz6 <- deldir::deldir(x=evalPointsX, y=evalPointsY, z=as.vector(LLResult$zx))
+LLResult <- interp::locpoly(x,y,z, degree=3, pd='all', h=c(Xbandwidth, Ybandwidth))
+open3d()
+dxyz6 <- deldir::deldir(x=evalPointsX, y=evalPointsY, z=as.vector(LLResult$zxy))
 persp3d(dxyz6, col = col, smooth = FALSE, main="Locpoly", axes=TRUE, box=TRUE)
