@@ -1,20 +1,25 @@
 ####Creating a large scale Monte-Carlo Simulation
-
+library(glmnet)
+library(KernSmooth)
+library(stats)
+library(epandist)
+library(locpol)
 
 #Parameters
 peak <- expression(2-5*x +5*exp(-400*(x-0.5)**2)) # sigma = sqrt(0.5)
 
-epochs <- 500
+epochs <- 10
 
 equation <- peak
 n <- 500
 p <- 10
 sigma <- sqrt(0.5)
 gridPoints <- seq(0,1,length.out=401)
+deriv <- 1 #Used for bandwidth calculations
 
 MasterDataList <- vector("list", epochs)
 for(i in 1:epochs){
-  MasterDataList[[i]] <- lassoEpoch(n, p, equation, sigma)
+  MasterDataList[[i]] <- lassoEpoch(n, p, equation, sigma, deriv)
   print(i)
 }
 
@@ -41,6 +46,7 @@ varOutput <- calcVariance(MasterDataList)
 plot(gridPoints, varOutput$varUnsmoothOutput, col='red', type='l', lwd=2)
 lines(gridPoints, varOutput$varSmoothOutput, col='orange', type='l', lwd=2)
 
+
 calcVariance <- function(MasterData, deriv=0){
   epochs <- length(MasterData)
   
@@ -51,7 +57,6 @@ calcVariance <- function(MasterData, deriv=0){
   for(i in 1:epochs){
     varUnsmoothOutput <- rbind(varUnsmoothOutput, (MasterData[[i]]$lasso[,deriv+1] - aveOutput$aveUnsmoothOutput)**2)
     varSmoothOutput <- rbind(varSmoothOutput, (MasterData[[i]]$smoothLasso[,deriv+1] - aveOutput$aveSmoothOutput)**2)
-    print(paste(i,sum(is.na(colMeans(varUnsmoothOutput)))))
   }
   return(list(varUnsmoothOutput = colMeans(varUnsmoothOutput), varSmoothOutput=colMeans(varSmoothOutput)))
   
@@ -69,10 +74,10 @@ calcAverage <- function(MasterData, deriv = 0){
   return(list(aveUnsmoothOutput = colMeans(aveUnsmoothOutput), aveSmoothOutput=colMeans(aveSmoothOutput)))
 }
 
-lassoEpoch <- function(n, p, equation, sigma){
+lassoEpoch <- function(n, p, equation, sigma, deriv){
   
   data <- buildData(n, equation, sigma)
-  bandwidth <- thumbBw(data$x,data$y,3,EpaK)
+  bandwidth <- thumbBw(data$x,data$y,deriv,EpaK)
   lassoData <- lassoCalculations(data$x, data$y, p, bandwidth)
   return(lassoData)
 }
@@ -180,3 +185,4 @@ computeWeights <- function(x, midpoint, bandwidth, epan=TRUE){
   }
   return(output)
 }
+

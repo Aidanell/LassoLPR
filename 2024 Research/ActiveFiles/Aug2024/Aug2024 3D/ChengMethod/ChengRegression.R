@@ -6,7 +6,7 @@ gridLength <- 40 #How many grid points in each direction (i.e we will evaluate a
 xylim <- c(0,1)
 n <- 250
 sigma <- sqrt(0.5)
-p <- 5 #How many degrees in Lasso
+p <- 1 #How many degrees in Lasso
 
 #True Regression Function
 f <- function(x,y){return(2-5*x-5*y +5*exp(-20*(x-0.5)**2 -20*(y-0.5)**2))}
@@ -104,10 +104,10 @@ fitpoints <- predict(chengsModel)
 
 # scatter plot with regression plane
 scatter3D(data$x, data$y, data$ghat, pch = 19, cex = 1,colvar = NULL, col="red", 
-          theta =20, phi = 30, bty="b",
+          theta =180, phi = 10, bty="b",
           xlab = "X bandwidth", ylab = "Y bandwidth", zlab = "Ghat Estimate",
           surf = list(x = x.pred, y = y.pred, z = z.pred,  
-                      facets = TRUE, fit = fitpoints, col=ramp.col (col = c("dodgerblue3","seagreen2"), n = 300, alpha=0.9), border="black"), main = "Advertising")
+                      facets = TRUE, fit = fitpoints, col=ramp.col (col = c("dodgerblue3","seagreen2"), n = 300, alpha=0.9), border="black"), main = "Cheng's Regression Model, P=1")
 
 
 
