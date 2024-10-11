@@ -163,7 +163,7 @@ derivCalc <- function(func, numDeriv){
 
 #Function of the Epanechnikov kernel
 epan <- function(x, bandwidth){
-  return(3/4 * (1-x**2))
+  ifelse(abs(x) <= 1, 3/4 * (1 - x^2), 0)
 }
 
 

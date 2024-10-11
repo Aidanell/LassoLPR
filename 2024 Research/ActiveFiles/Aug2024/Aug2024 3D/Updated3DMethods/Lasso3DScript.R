@@ -10,7 +10,7 @@ gridLength <- 40 #How many grid points in each direction (i.e we will evaluate a
 xylim <- c(0,1)
 n <- 250
 sigma <- sqrt(0.5)
-p <- 10 #How many degrees in Lasso
+p <- 4 #How many degrees in Lasso
 
 #True Regression Function
 f <- function(x,y){return(2-5*x-5*y +5*exp(-20*(x-0.5)**2 -20*(y-0.5)**2))}
@@ -48,7 +48,7 @@ smoothLassoResult <- smoothLassoComputation(x,y,z,n,p, smoothedLambdas, Xbandwid
 
 #plotting
 col <- cm.colors(20)[1 + round(19*(z - min(z))/diff(range(z)))]
-deriv <- 5
+deriv <- 1
 
 open3d()
 dxyz1 <- deldir::deldir(x=evalPointsX, y=evalPointsY, z=lassoResult[[deriv]])
