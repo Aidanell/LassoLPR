@@ -6,7 +6,7 @@ gridLength <- 40 #How many grid points in each direction (i.e we will evaluate a
 xylim <- c(0,1)
 n <- 250
 sigma <- sqrt(0.5)
-p <- 1 #How many degrees in Lasso
+p <- 3 #How many degrees in Lasso
 
 #True Regression Function
 f <- function(x,y){return(2-5*x-5*y +5*exp(-20*(x-0.5)**2 -20*(y-0.5)**2))}

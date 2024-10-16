@@ -1,4 +1,4 @@
-
+h
 #p=1, r=0
 h1 <- thumbBw(x,y,deg=1, gaussK)
 
