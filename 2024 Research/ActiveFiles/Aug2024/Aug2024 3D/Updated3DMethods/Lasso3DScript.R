@@ -35,8 +35,8 @@ z <- f(x, y) + rnorm(n, sd=sigma)
 generatedData <- data.frame("x"=x, "y"=y, "z"=z)
 
 #Bandwidths
-Xbandwidth <- dpill(x,z) * 4
-Ybandwidth <- dpill(y,z) * 4
+Xbandwidth <- thumbBw(x,z,3,EpaK)
+Ybandwidth <- thumbBw(y,z,3,EpaK)
 
 #Building nonparametric Models
 lassoResult <- buildLassoMatricies(x,y,z,n,p, Xbandwidth, Ybandwidth, evalPointsX, evalPointsY, gridLength)
@@ -45,6 +45,27 @@ lassoResult <- lassoResult[[1]]
 
 smoothedLambdas <- loess(unsmoothedLambdas ~ evalPointsX + evalPointsY, span=0.1)$fitted
 smoothLassoResult <- smoothLassoComputation(x,y,z,n,p, smoothedLambdas, Xbandwidth, Ybandwidth, evalPointsX, evalPointsY, gridLength)
+
+
+#Calculating MSE
+lassoMSE <- sum((lassoResult[[1]] - trueResults[[1]])**2)
+LLMSE <- sum((as.vector(LLResult$z) - trueResults[[1]])**2)
+
+diffInSE <- (lassoResult[[1]] - trueResults[[1]])**2 - (as.vector(LLResult$z) - trueResults[[1]])**2
+
+errorFrame <- data.frame(lassoSE = (lassoResult[[1]] - trueResults[[1]])**2,
+           LLSE = (as.vector(LLResult$z) - trueResults[[1]])**2,
+           diffInSE = diffInSE,
+           evalPointsX = evalPointsX,
+           evalPointsY = evalPointsY)
+library(ggplot2)
+MSEheatmap <- ggplot(data=errorFrame, mapping=aes(x=evalPointsX, y=evalPointsY, fill=diffInSE)) + geom_tile() +
+  scale_fill_gradient2('pi0', low = "blue", mid = "white", high = "red", midpoint = 0, limits=range(-0.5,0.5))
+MSEheatmap
+
+MSEheatmap <- ggplot(data=errorFrame, mapping=aes(x=evalPointsX, y=evalPointsY, fill=LLSE)) + geom_tile() +
+  scale_fill_gradient2('pi0', low = "blue", mid = "white", high = "red", midpoint = 0)
+MSEheatmap
 
 #plotting
 col <- cm.colors(20)[1 + round(19*(z - min(z))/diff(range(z)))]
@@ -57,11 +78,11 @@ persp3d(dxyz1, col = col, smooth = FALSE, main="Lasso Unsmoothed Lambdas")
 
 open3d()
 dxyz2 <- deldir::deldir(x=evalPointsX, y=evalPointsY, z=smoothLassoResult[[deriv]])
-persp3d(dxyz2, col = col, smooth = FALSE, main="Lasso Smoothed Lambdas")
+persp3d(dxyz2, col = col, smooth = FALSE, main="Lasso Smoothed Lambdas", zlim=zBound)
 
 open3d()
 dxyz3 <- deldir::deldir(x=evalPointsX, y=evalPointsY, z=trueResults[[deriv]])
-persp3d(dxyz3, col = col, smooth = FALSE)
+persp3d(dxyz3, col = col, smooth = FALSE, zlim=zBound)
 
 
 open3d()
@@ -73,10 +94,12 @@ open3d()
 dxyz5 <- deldir::deldir(x=evalPointsX, y=evalPointsY, z=smoothedLambdas)
 persp3d(dxyz5, col = col, smooth = FALSE, main="Smoothed Lambdas")
 
-
+zBound <- c(-8,2)
 
 #Locpoly 3D
 LLResult <- interp::locpoly(x,y,z, degree=3, pd='all', h=c(Xbandwidth, Ybandwidth))
 open3d()
-dxyz6 <- deldir::deldir(x=evalPointsX, y=evalPointsY, z=as.vector(LLResult$zxy))
-persp3d(dxyz6, col = col, smooth = FALSE, main="Locpoly", axes=TRUE, box=TRUE)
+dxyz6 <- deldir::deldir(x=evalPointsX, y=evalPointsY, z=as.vector(LLResult$z))
+persp3d(dxyz6, col = col, smooth = FALSE, main="Locpoly", axes=TRUE, box=TRUE, zlim=zBound)
+
+

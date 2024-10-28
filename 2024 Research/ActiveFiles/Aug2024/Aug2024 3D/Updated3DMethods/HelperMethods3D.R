@@ -98,7 +98,7 @@ smoothLassoComputation<- function(x,y,z,n,p, smoothedLambdas, Xbandwidth, Ybandw
     weights <- xWeights * yWeights
     
     #Fit lasso and find best lambda
-    lassoFit <- glmnet(feature, z, weights = weights, standardize=TRUE, maxit=1000000)
+    lassoFit <- glmnet(feature, z, weights = weights, standardize=TRUE, maxit=1000000, exact=TRUE)
     lassoCoef <- as.vector(coef(lassoFit, s=smoothedLambdas[i]))
     
     #Organize all the derivative estimates
