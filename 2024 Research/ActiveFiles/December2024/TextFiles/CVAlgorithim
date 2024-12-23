@@ -1,0 +1,8 @@
+Pseudo Code for determining lambda at a SINGLE datapoint
+Perform LOOCV
+For each lambda in a sequence (determined via glmnet's recommendation or some other way)
+  For each datapoint in the window
+      -fit model with all data except specific datapoint
+      -Calculate squared error of all datapoints WEIGHTED BASED ON KERNEL
+  Take average of results to get our CV estimate
+Use the lambda that generated the lowest CV estiamte

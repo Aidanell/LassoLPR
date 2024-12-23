@@ -7,6 +7,7 @@ buildData <- function(n, equation, sigma){
   return(list(x=x,y=y,trueY=trueY))
 }
 library(locpol)
+library(KernSmooth)
 #True Functions----
 derivCalc <- function(func, numDeriv){
   drvList <- c(func)
@@ -34,7 +35,7 @@ bandwidth <- thumbBw(sampleData$x,sampleData$y,deriv, gaussK)
 bandwidth2 <- thumbBw(sampleData$x,sampleData$y,deriv, EpaK)
 
 set.seed(40)
-testLassoLib <- lassoLPR(sampleData$x, sampleData$y, bandwidth*3, p, kernel="normal")
+#testLassoLib <- lassoLPR(sampleData$x, sampleData$y, bandwidth*3, p, kernel="normal")
 
 set.seed(40)
 testLassoLib2 <- lassoLPR(sampleData$x, sampleData$y, bandwidth2, p, kernel="epak")
