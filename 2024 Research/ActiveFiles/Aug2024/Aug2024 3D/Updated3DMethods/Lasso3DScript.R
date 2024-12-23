@@ -35,8 +35,8 @@ z <- f(x, y) + rnorm(n, sd=sigma)
 generatedData <- data.frame("x"=x, "y"=y, "z"=z)
 
 #Bandwidths
-Xbandwidth <- dpill(x,z) * 4
-Ybandwidth <- dpill(y,z) * 4
+Xbandwidth <- thumbBw(x,z, deg=3, EpaK)
+Ybandwidth <- thumbBw(y,z, deg=3, EpaK)
 
 #Building nonparametric Models
 lassoResult <- buildLassoMatricies(x,y,z,n,p, Xbandwidth, Ybandwidth, evalPointsX, evalPointsY, gridLength)

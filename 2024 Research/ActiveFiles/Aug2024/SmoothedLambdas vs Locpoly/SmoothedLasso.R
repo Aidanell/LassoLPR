@@ -33,7 +33,7 @@ lassoBandwidth <- dpill(x,y)*8
 evalPoints <- seq(left, right, length.out=401)
 
 #######Cv.Glmnet calculations########
-lassoOutput <- matrix(nrow=401, ncol=numTerms+1)
+lassoOutput <- matrix(nrow=401, ncol=numTerms)
 ListOfLambdas <- c()
 
 for(i in 1:length(evalPoints)){
@@ -53,7 +53,7 @@ for(i in 1:length(evalPoints)){
 
 ##########Computing Smoothed Lambdas Lasso############
 smoothedLambas <- lowess(evalPoints, ListOfLambdas, f=1/10)$y
-smoothLassoOutput <- matrix(nrow=401, ncol=numTerms+1)
+smoothLassoOutput <- matrix(nrow=401, ncol=numTerms)
 
 for(i in 1:length(evalPoints)){
   currentPoint <- evalPoints[i]
