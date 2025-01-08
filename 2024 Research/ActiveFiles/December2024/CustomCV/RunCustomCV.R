@@ -17,9 +17,9 @@ buildData <- function(n, equation, sigma){
 n <- 500
 peak <- expression(2-5*x +5*exp(-400*(x-0.5)**2))  # sigma = sqrt(0.5)
 #peak <- expression(0.5*x)
-p <- 4
+p <- 9
 sigma <- sqrt(0.5)
-deriv <- 3 #Used for bandwidth calculations
+deriv <- 0 #Used for bandwidth calculations
 sampleData <- buildData(n, peak, sigma)
 bandwidth <- thumbBw(sampleData$x,sampleData$y,deriv,gaussK)
 
@@ -57,15 +57,16 @@ testingCustomCV <- function(x, y, h, p=10, numGridPoints=401){
     
     currentPoint <- gridPoints[i]
     X <- buildFeature(currentPoint, p, x)
-    lassoWeights <- computeWeights(x, currentPoint, h, kernel='norm')
-    hist(lassoWeights)
+    variableH <- h*variableBands[i]
+    lassoWeights <- computeWeights(x, currentPoint, variableH, kernel='norm')
+    #hist(lassoWeights)
     closeIndex <- which(lassoWeights > quantile(lassoWeights, 0.5)) #I do not care about performance if they are not in the window
     #closeIndex <- which( abs(x - currentPoint)/1.3*h < 1)
     print(length(closeIndex))
     
-    lambdaSeq <- glmnet::glmnet(X[closeIndex,], y[closeIndex], weights = lassoWeights[closeIndex], maxit=10**7, nlambda=100)$lambda
+    lambdaSeq <- glmnet::glmnet(X[closeIndex,], y[closeIndex], weights = lassoWeights[closeIndex], maxit=10**7, nlambda=25)$lambda
 
-    PerformCV <- NfoldCV(x[closeIndex], y[closeIndex], currentPoint, lambdaSeq, lassoWeights[closeIndex], p, trueY[closeIndex], folds=20)
+    PerformCV <- NfoldCV(x[closeIndex], y[closeIndex], currentPoint, lambdaSeq, lassoWeights[closeIndex], p, trueY[closeIndex], folds=5)
     lassoCoef <- PerformCV[[1]]
     lambdas[i] <- PerformCV[[2]]
     print(i)
@@ -79,11 +80,11 @@ testLasso <- testingCustomCV(sampleData$x, sampleData$y, h=bandwidth, p=9)
 
 
 #Choose what derivative to plot, Change as needed*********
-derivative <- 1
+derivative <- 4
 
 #Runs a locpoly example to compare with.
 locBand <- dpill(sampleData$x, sampleData$y)
-locOut <- locpoly(sampleData$x, sampleData$y, bandwidth=locBand*2, drv=derivative)
+locOut <- locpoly(sampleData$x, sampleData$y, bandwidth=locBand, drv=derivative)
 
 #Plotting
 title <- paste("Performance Comparison of Lasso vs Locpoly for Derivative ", derivative+1)
@@ -100,4 +101,21 @@ if(derivative == 0){
 plot(seq(0,1, length.out=401), testLasso[[1]][,2], type='l')
 plot(seq(0,1, length.out=401), testLasso[[2]], type='l')
 
+#Dynamic Bandwidth? Bandwidth based on variance calculated from smoothing window
+#Balance weights?
+#Less 
 
+
+gridPoints <- seq(0,1, length.out=401)
+localVariance <- numeric(401)
+windowSize <- 0.1
+for(i in 1:length(gridPoints)){
+  
+  currPoint <- gridPoints[i]
+  InWindow <- which( abs(sampleData$x - currPoint)/windowSize < 1)
+  meanInWindow <- mean(sampleData$y[InWindow]^2)
+  localVariance[i] <- mean(sampleData$y[InWindow]^2) - mean(sampleData$y[InWindow])^2
+}
+plot(gridPoints, localVariance)
+variableBands <- 3 - localVariance/3
+plot(gridPoints, variableBands, type='l')
