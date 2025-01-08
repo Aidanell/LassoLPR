@@ -13,7 +13,7 @@ buildData <- function(n, equation, sigma){
 }
 
 #Create neccesary data----
-n <- 500
+n <- 1000
 peak <- expression(2-5*x +5*exp(-400*(x-0.5)**2))  # sigma = sqrt(0.5)
 #peak <- expression(0.5*x)
 p <- 9
@@ -46,7 +46,7 @@ trueFunctions <- list(eval(derivList[1]),eval(derivList[2]),eval(derivList[3]),e
 testLasso <- lassoLPR(sampleData$x, sampleData$y, h=bandwidth, p=p)
 
 #Choose what derivative to plot, Change as needed*********
-derivative <- 0
+derivative <- 2
 
 #Runs a locpoly example to compare with.
 locBand <- dpill(sampleData$x, sampleData$y)
@@ -65,4 +65,4 @@ if(derivative == 0){
   points(sampleData$x, sampleData$y, pch=20, col = rgb(red = 0, green = 0, blue = 0, alpha = 0.1))  
 }
 
-
+plot(seq(0,1, length.out=401), testLasso$lambdas)
