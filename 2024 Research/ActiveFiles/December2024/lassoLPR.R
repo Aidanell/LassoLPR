@@ -67,7 +67,7 @@ lassoLPR <- function(x, y, h, p=10, nlambda=25, numGridPoints=401, kernel="epak"
     lassoFit <- glmnet::glmnet(X, y, weights = lassoWeights, maxit=10**7)
     
     # Selects the desired coefficients with the best lambda
-    smoothLassoCoef <- coef(lassoFit, s=smoothLambdas[i])
+    smoothLassoCoef <- coef(lassoFit, s=smoothLambdas[i], exact=TRUE, x=X, y=y, weights=lassoWeights)
     
     #The i'th row contains all estimated p+1 derivatives estimation at the i'th gridpoint
     smoothLassoOutput[i, ] <- as.vector(smoothLassoCoef) 
