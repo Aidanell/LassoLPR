@@ -19,7 +19,7 @@ buildData <- function(n, equation, sigma){
 n <- 500
 peak <- expression(2-5*x +5*exp(-400*(x-0.5)**2))  # sigma = sqrt(0.5)
 #peak <- expression(0.5*x)
-p <- 9
+p <- 3
 sigma <- sqrt(0.5)
 deriv <- 0 #Used for bandwidth calculations
 sampleData <- buildData(n, peak, sigma)
@@ -46,7 +46,7 @@ x <- sampleData$x
 trueY <- eval(peak)
 
 
-deriv <- 0
+deriv <- 1
 lamOut <- numeric(length(gridPoints))
 predOut <- numeric(length(gridPoints))
 
@@ -81,10 +81,10 @@ findOptimalLambda <- function(deriv, i){
   possibleMin <- which(MAE == min(MAE))
   lastMinIndex <- tail(possibleMin, 1)
   minLam <- lambdas[lastMinIndex]
-  plot(lambdas, MAE)
-  points(minLam, MAE[lastMinIndex], pch=16, cex=2, col='red')
+  #plot(lambdas, MAE)
+  #points(minLam, MAE[lastMinIndex], pch=16, cex=2, col='red')
   
-  return(c(minLam, predicted))
+  return(c(minLam, predicted[lastMinIndex]))
 }
 
 for(i in 1:length(gridPoints)){
@@ -98,11 +98,9 @@ for(i in 1:length(gridPoints)){
 
 
 locBand <- dpill(sampleData$x, sampleData$y)
-locOut <- locpoly(sampleData$x, sampleData$y, bandwidth=locBand*(deriv+1), drv=deriv)
+locOut <- locpoly(sampleData$x, sampleData$y, bandwidth=locBand*2.2, drv=deriv)
 
 plot(gridPoints, lamOut, type='l')
-
-
 plot(gridPoints, trueFunctions[[deriv+1]], lwd=2, type='l')
 lines(gridPoints, predOut, type='l', col='blue', lwd=2)
 lines(locOut, col='red', lwd=2)
@@ -114,4 +112,12 @@ lines(locOut, col='red', lwd=2)
 #So if we want to estimate a certain lambda, we are always going to be restricted
 #by how glmnet chooses variables
 
+
+bigLam <- which(lamOut > 0.1)
+points(gridPoints[bigLam], predOut[bigLam], col='green', pch=16, cex=0.5)
+
+
+
+#So the cross validation is measuring error based on the true data because that is what 
+#we have. If we wanted to measure the 
 

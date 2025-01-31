@@ -115,7 +115,6 @@ testingCustomCV <- function(x, y, h, p=10, numGridPoints=401, varBands = FALSE){
   
   gridPoints <- seq(min(x), max(x), length.out=numGridPoints)
   
-  
   lassoOutput <- matrix(nrow=numGridPoints, ncol=p+1) #ith column shows estimates of (i-1)th derivative 
   lambdas <- numeric(numGridPoints) #Tracks lambda parameter over x
   
@@ -150,7 +149,34 @@ testingCustomCV <- function(x, y, h, p=10, numGridPoints=401, varBands = FALSE){
     #The i'th row contains all estimated p+1 derivatives estimation at the i'th gridpoint
     lassoOutput[i, ] <- as.vector(lassoCoef) 
   }
-  return(list(lassoOutput, lambdas))
+  
+  smoothLambdas <- stats::lowess(gridPoints, lambdas, f=1/10)$y
+  smoothLassoOutput <- matrix(nrow=401, ncol=p+1)
+  
+  #Refit regression with smoothed lambdas
+  for(i in 1:length(gridPoints)){
+    currentPoint <- gridPoints[i]
+    
+    currentPoint <- gridPoints[i]
+    X <- buildFeature(currentPoint, p, x)
+    if(varBands == TRUE){
+      variableH <- h*variableBands[i]
+      lassoWeights <- computeWeights(x, currentPoint, variableH, kernel='norm')
+    }else{
+      lassoWeights <- computeWeights(x, currentPoint, h, kernel='norm') 
+    }
+    
+    lassoFit <- glmnet::glmnet(X, y, weights = lassoWeights, maxit=10**7)
+    #lassoCoef <- coef(lassoFit, s=lambda, exact=TRUE, x=X, y=y, weights=weights)
+    
+    # Selects the desired coefficients with the best lambda
+    smoothLassoCoef <- coef(lassoFit, s=smoothLambdas[i], exact=TRUE, x=X, y=y, weights=lassoWeights)
+    
+    #The i'th row contains all estimated p+1 derivatives estimation at the i'th gridpoint
+    smoothLassoOutput[i, ] <- as.vector(smoothLassoCoef) 
+  }
+  
+  return(list(lassoOutput, lambdas, smoothLassoOutput, smoothLambdas))
 }
 
 

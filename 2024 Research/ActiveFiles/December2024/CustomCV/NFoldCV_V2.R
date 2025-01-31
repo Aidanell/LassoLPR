@@ -25,6 +25,7 @@ NFoldCV_V2 <-function(x, y, gridPoint, lambdas, weights, p, trueY, folds = 10){
       #Fit model without one of the folds
       lassoFit <- glmnet::glmnet(X[-currentLeftOut,], y[-currentLeftOut], weights = weights[-currentLeftOut], maxit=10**7)
       lassoCoef <- as.vector(coef(lassoFit, s=lambda))
+      #plot(lassoFit)
       
       
       #We only want to evaluate with points that are close to the gridPoint (and in the fold)

@@ -43,6 +43,7 @@ lassoLPR <- function(x, y, h, p=10, nlambda=25, numGridPoints=401, kernel="epak"
     #Performing lasso regression, finding optimal lambda
     lassoFit <- glmnet::cv.glmnet(X, y, weights = lassoWeights, maxit=10**7, nlambda=nlambda)
     lambdas[i] <- lassoFit$lambda.min
+    #plot(lassoFit)
     
     # Selects the desired coefficients with the best lambda
     lassoCoef <- coef(lassoFit, s="lambda.min")
@@ -73,7 +74,7 @@ lassoLPR <- function(x, y, h, p=10, nlambda=25, numGridPoints=401, kernel="epak"
     smoothLassoOutput[i, ] <- as.vector(smoothLassoCoef) 
   }
   
-  return(list(lasso=smoothLassoOutput, lambdas=smoothLambdas))
+  return(list(lasso=smoothLassoOutput, lambdas=smoothLambdas, unsmoothLasso=lassoOutput, unsmoothLambdas=lambdas))
 }
 
 #Helper Methods----
