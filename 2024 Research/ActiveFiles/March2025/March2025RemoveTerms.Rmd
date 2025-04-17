@@ -1,0 +1,161 @@
+---
+title: "Removing Terms"
+author: "Aidan Elliott"
+date: "2025-04-09"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+set.seed(42) #For reproducability
+
+
+#Thesee are just functions used to build the linear regression model
+gaussKernel <- function(x){
+  1/sqrt(2*pi) * exp(-x^2 / 2)
+}
+
+buildFeature <- function(midpoint, p, xValues){
+  # Every j'th column is the coefficient of the (j-1)'th derivative in the
+  # Taylor polynomial formed at the i'th point.
+  
+  X <- matrix(nrow = length(xValues), ncol = p)
+  for(i in 1:p){
+    X[,i] <- ((xValues - midpoint)^(i))/factorial(i)
+  }
+  return(X)
+}
+
+computeWeights <- function(x, x0, bandwidth, kernel='epak'){
+  weights <- numeric(length(x))
+  
+  for(i in 1:length(x)){
+    diff <- abs(x[i]-x0) / bandwidth
+    if(kernel == 'epak'){
+      weights[i] <- epan(diff)/bandwidth
+    }else{
+      weights[i] <- dnorm(diff)/bandwidth
+    }
+  }
+  return(weights)
+}
+
+
+derivCalc <- function(func, numDeriv){
+  drvList <- c(func)
+  nextDrv <- func
+  for(i in 1:numDeriv){
+    nextDrv <- D(nextDrv, 'x')
+    drvList <- c(drvList, nextDrv)
+  }
+  return(drvList)
+}
+```
+
+Hi Spectrum, I wanted to demonstrate what I have been trying to prove these last few weeks. Some of the results are quite substantial, so I wanted to formalize an example.
+
+I have been trying to prove that removing terms from the local polynomial terms will reduce the variance of other terms without substantially changing bias. In practice, we have to find a way to automatically remove terms (which is what lasso is for), but I want to demonstrate in a crafted example that it would work. 
+
+First, here is the equation. I needed an equation that had some middle order derivatives near 0 (not particularly in an asymptotic sense, just relative to the other terms). I am using the example of the polynomial f(x) = 0.3x**5 - 1.2x**4 + 0.01x**3 + 0.2x**2 + 0.6x + 0.2,
+evaluated at x=0. This function at x=0 has true derivatives (starting from derivative 0) equal to : (0.2, 0.6,  0.4,  0.06,  -28.8,  36, 0, ...., 0).
+
+Note that the 3rd derivative here is only 0.06. It may be beneficial to assume that this is zero to improve the estimation of other terms. Removing the terms from our equation is easy, we just exclude that column from our design matrix X. 
+
+In order to compare, we generate 1000 data sets and get the betas for each one. Use p=6 and h=0.3 for this example. They are arbitrary for now
+
+```{r loadData}
+
+#Try polynomial where 3rd derivative is close to zero at x=0
+testpoly <- expression(0.3*x**5 - 1.2*x**4 + 0.01*x**3 + 0.2*x**2 + 0.6*x + 0.2)
+
+#This will automatically calculate the true derivatives of the function for us
+polyderivList <- derivCalc(func = testpoly, numDeriv = 10)
+
+p <- 6
+n <- 100 #Each iteration has 100 datapoints
+x0 = 0 #Evaluate function at x0
+bandwidth = 0.3 #Arbitrary for a toy example like this
+iterations <- 1000 #Simulations
+
+betas <- matrix(nrow=iterations, ncol=p+1)
+betaStars <- matrix(nrow=iterations, ncol=p+1)
+
+termsToRemove <- c(3) #Remove third derivative, We can remove multiple if needed
+for(i in 1:iterations){
+  
+  x <- runif(n, -1,1) #Genearate  dataset. 
+  
+  #Create Design Matrix
+  X <- buildFeature(x0, p, x)
+  X <- cbind(rep(1,n), X)
+  #Remove columns for other case
+  XStar <- X[, -(termsToRemove+1)]
+  #Weights are same for both cases
+  W <- diag(computeWeights(x, x0, bandwidth, kernel='norm'))
+  
+  #Get y values with some noise attached
+  y <- as.matrix(eval(testpoly) + rnorm(n, 0, 0.1))
+  
+  #This is the weighted linear regression formula. 
+  betahat <- solve(t(X) %*% W %*% X) %*% t(X) %*% W %*% y
+  betahatStar <- solve(t(XStar) %*% W %*% XStar) %*% t(XStar) %*% W %*% y
+  
+  #This just appends 0 to the list where of betas where we assumed to be zero
+  #Its just for comparison purposes
+  for(j in 1:length(termsToRemove)){
+    currentTerm <- termsToRemove[j]
+    betahatStar <- append(betahatStar, 0, after=(currentTerm))
+  }
+  
+  #Append this iteration to dataset
+  betas[i,] <- betahat
+  betaStars[i,] <- betahatStar
+  
+}
+```
+
+## Including Plots
+
+Now that the simulation is complete lets look at the mean, variance, and distribution of each beta. 
+
+NOTES: 
+-The true value of each beta is indicated by the vertical red line on each graph.
+-The third derivative graph is just a bar because we manually remove it. It is always set to zero.
+```{r showPlots}
+
+
+plotHists <- function(j){
+  beta <- eval(polyderivList[[j+1]], list(x=x0))
+betahat <- mean(betas[,j+1])
+betahatStar <- mean(betaStars[,j+1])
+#print(beta)
+#print(betahat)
+#print(betahatStar)
+#var(betas[,j+1])
+#var(betaStars[,j+1])
+
+#This makes sure the scale of each graph are the same. Helps with comparison
+xlimits <- c(min(betas[,j+1]), max(betas[,j+1]))
+
+par(mfrow=c(1,2))
+subTitle1 <- paste("Mean:", format(betahat, digits=5), " Var:", format(var(betas[,j+1]), digits=5))
+hist(betas[,j+1], xlim=xlimits, breaks=20, main="Locpoly", xlab=paste("Beta", j), sub=subTitle1)
+abline(v=beta, col='red')
+
+subTitle2 <- paste("Mean:", format(betahatStar, digits=5), " Var:", format(var(betaStars[,j+1]), digits=5))
+hist(betaStars[,j+1], xlim=xlimits, breaks=20, main="3rd Term Removed", xlab=paste("Beta", j), sub=subTitle2)
+abline(v=beta, col='red')
+}
+
+
+for(i in 0:6){
+  plotHists(i)
+}
+
+```
+
+Pretty interesting hey! Some of the term's variance decrease by an entire magnitude. 
+
+
+
+I think this sharp decrease in variance is due to the decrease in condition number. Since the columns are quite collinear, the calculation is very sensitive. Removing some of the columns helps with this, reducing variance. 
+
