@@ -14,7 +14,7 @@ CustomLassoLPR <- function(x, y, h, p=10, numGridPoints=401, varBands = FALSE){
     lassoWeights <- computeWeights(x, currentPoint, h, kernel='norm') 
     
     #Calculate the sequence of lambdas to use
-    lambdaSeq <- glmnet::glmnet(X, y, weights = lassoWeights, maxit=10**7, nlambda=10)$lambda
+    lambdaSeq <- glmnet::glmnet(X, y, weights = lassoWeights, maxit=10**7, nlambda=25)$lambda
     
     #Perform n-fold cross validation to calculate the 
     PerformCV <- PerformCCV(x, y, currentPoint, lambdaSeq, lassoWeights, p, folds=5)
@@ -28,6 +28,7 @@ CustomLassoLPR <- function(x, y, h, p=10, numGridPoints=401, varBands = FALSE){
   }
   
   smoothLambdas <- stats::lowess(gridPoints, lambdas, f=1/10)$y
+  smoothLambdas[smoothLambdas < 0] = 0
   smoothLassoOutput <- matrix(nrow=401, ncol=p+1)
   
   #Refit regression with smoothed lambdas
